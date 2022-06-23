@@ -1,0 +1,11 @@
+# version 0.0.3
+- completed inital user_guide.pdf
+
+# version 0.0.2
+- updated readme
+- made user_guide.pdf
+- commented out audio utils usage: bug found, fix TBD
+
+# version 0.0.1
+- changes not tracked
+- inital mod_utils and audio_utils created

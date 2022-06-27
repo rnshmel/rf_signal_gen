@@ -560,6 +560,66 @@ def qpsk_mod(raw_data, samp_rate, baud_rate, center_freq):
         complex_array = np.zeros(0,dtype="complex64")
         return 1, complex_array
 
+"""
+basic ook modulation
+inputs:
+raw_data - bytearray - the raw binary data to modulate
+samp_rate - int - sample rate of end IQ data
+baud_rate - int - baud rate of input data (samples per symbol)
+outputs:
+exit_code - int - function return code: 0 for success, 1+ for errors
+iq_data - numpy array, complex64 - output modulation data
+"""
+def ook_mod(raw_data, samp_rate, baud_rate, center_freq):
+    # function wrapped in try-except
+    try:
+        sps = int(samp_rate/baud_rate) # samples per symbol
+        amp_array = np.zeros(len(raw_data)*8*sps,dtype = "float32") # bit-expanded array
+        pos = 0 # variable to store position in phi array
+        # loop through the bytearray raw data
+        for i in range(0, len(raw_data)):
+            # loop through each bit
+            for j in range(0,8):
+                # for each bit, shift left and AND with 128
+                # if value is 0, shifted bit was zero
+                # else, shifted bit was 1
+                bit = raw_data[i] << j & 128
+                if bit > 0:
+                    # if > 0: add samp_rate number of 1's to phi array
+                    # else: add samp_rate number of 0's to phi array
+                    for k in range(0,sps):
+                        amp_array[pos+k] = 1.0
+                    pos = pos + sps
+                else:
+                    for k in range(0,sps):
+                        amp_array[pos+k] = 0.0
+                    pos = pos + sps
+        # generate a tone
+        if (center_freq != 0):
+            exit, tone_sig = tone_gen(center_freq, len(amp_array), samp_rate)
+            if (exit != 0):
+                # error with tone
+                # return 1 and an empty array
+                complex_array = np.zeros(0,dtype="complex64")
+                return 1, complex_array
+        else:
+            exit, tone_sig = tone_gen(0, len(amp_array), samp_rate)
+            if (exit != 0):
+                # error with tone
+                # return 1 and an empty array
+                complex_array = np.zeros(0,dtype="complex64")
+                return 1, complex_array
+        # multiply amp array with tone array
+        # combine into a complex array
+        # save as complex64 (default is complex128)
+        complex_array = (tone_sig * amp_array).astype("complex64")
+        # return exit code 0 and complex array
+        return 0, complex_array
+    except:
+        # error handle
+        # return 1 and an empty array
+        complex_array = np.zeros(0,dtype="complex64")
+        return 1, complex_array
 
 """
 main function for testing purpose
@@ -598,7 +658,8 @@ if __name__ == '__main__':
     #exit, data = bpsk_mod(raw_data, samp_rate, baud_rate, center_freq)
     #exit, data = bpsk_mod_lsl(raw_data, samp_rate, baud_rate, center_freq, 31)
     #exit, data = tone_gen(50000, samp_rate, samp_rate)
-    exit, data = gfsk_mod_4(raw_data, samp_rate, baud_rate, freq_div, center_freq, window_len)
+    #exit, data = gfsk_mod_4(raw_data, samp_rate, baud_rate, freq_div, center_freq, window_len)
+    exit, data = ook_mod(raw_data, samp_rate, baud_rate, center_freq)
 
     #filename = "/home/user/Downloads/flock_of_seagulls.wav"
     #filename = "/home/user/Downloads/pcm0808m.wav"

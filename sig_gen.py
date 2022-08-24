@@ -2,6 +2,7 @@
 # made to allow easiers use of sig gen libs
 from tkinter import N
 import mod_utils
+import audio_utils
 import sys
 
 program_version = "0.0.3"
@@ -15,7 +16,6 @@ def open_file(filename):
     except:
         return 1, 0
 
-
 def sing_tone_sel():
     print("\nsingle tone selected\n")
     freq = int(input("baseband frequency (Hz): "))
@@ -26,20 +26,29 @@ def sing_tone_sel():
 
 def swept_tone_sel():
     print("\nswept tone selected\n")
-    print("PLACEHOLDER - function not written yet")
-    exit, data = 1, 0
+    str_freq = int(input("start baseband frequency (Hz): "))
+    stp_freq = int(input("stop baseband frequency (Hz): "))
+    N = int(input("signal length (number-of-samples): "))
+    samp_rate = int(input("sample rate (sps): "))
+    exit, data = mod_utils.chirp_gen(str_freq,stp_freq,N,samp_rate)
     return exit, data
 
 def analog_am_sel():
     print("\nanalog AM selected\n")
-    print("PLACEHOLDER - function not written yet")
-    exit, data = 1, 0
+    filename = str(input("WAV file name: "))
+    mod_th = int(input("AM modulation threshold (0 - 1): "))
+    samp_rate = int(input("sample rate (sps): "))
+    scale = int(input("audio scale factor (int): "))
+    exit, data = audio_utils.am_analog_mod(filename, mod_th, samp_rate, scale)
     return exit, data
 
 def analog_fm_sel():
     print("\nanalog FM selected\n")
-    print("PLACEHOLDER - function not written yet")
-    exit, data = 1, 0
+    filename = str(input("WAV file name: "))
+    mod_bw = int(input("FM modulation bandwidth (Hz): "))
+    samp_rate = int(input("sample rate (sps): "))
+    scale = int(input("audio scale factor (int): "))
+    exit, data = audio_utils.fm_analog_mod(filename, mod_bw, samp_rate, scale)
     return exit, data
 
 def ook_sel():

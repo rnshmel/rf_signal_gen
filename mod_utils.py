@@ -65,25 +65,26 @@ def tone_gen(freq, N, samp_rate):
         return 1, complex_array
 
 """
-analog FM modulation
-this function assumes nothing about the analog input other than that it is a numpy array:
-enusre the data is upsampled/padded/interpolated BEFORE passing to FM mod
-must be float32
+generate a single complex chirp
 inputs:
-raw_data - np_array (f32) - the raw binary data to modulate
-freq_div - int - frequency spacing between low and high freq (BW)
+start_freq - starting frequency (int)
+stop_freq - stoping frequency (int)
+N - length in samples (int)
+samp_rate - sample rate (int)
 outputs:
 exit_code - int - function return code: 0 for success, 1+ for errors
-iq_data - numpy array, complex64 - output modulation data
+iq_data - numpy array, complex64 - output np array
 """
-def fm_mod(raw_data, samp_rate, freq_div, center_freq):
+def chirp_gen(start_freq, stop_freq, N, samp_rate):
     # function wrapped in try-except
     try:
-        plt.plot(raw_data)
-        plt.show()
-        freq_array = (raw_data * (freq_div/2)) + center_freq
+        # generate a numpy array of length N, filled with freq val
+        step = float((stop_freq - start_freq)/N)
+        print(step)
+        freq_array = np.arange(start_freq, stop_freq, step, dtype="float32")
+        freq_array = freq_array * 2 * np.pi
         # integrate frequency to calculate the phase at any given sample value
-        phi_array = np.cumsum(freq_array*2*np.pi)/samp_rate
+        phi_array = np.cumsum(freq_array/samp_rate)
         # get i values with cosine
         cos_array = np.cos(phi_array)
         # get j values with sine
@@ -98,7 +99,6 @@ def fm_mod(raw_data, samp_rate, freq_div, center_freq):
         # return 1 and an empty array
         complex_array = np.zeros(0,dtype="complex64")
         return 1, complex_array
-
 
 """
 basic 2fsk modulation: non-coherent
@@ -418,74 +418,6 @@ def bpsk_mod(raw_data, samp_rate, baud_rate, center_freq):
         complex_array = np.zeros(0,dtype="complex64")
         return 1, complex_array
 
-"""
-smoothed bpsk modulation (bpsk lower-side-lobes)
-bpsk with phase shifts smoothed by gaussian filter - experimental reduction in spectral side lobes
-inputs:
-raw_data - bytearray - the raw binary data to modulate
-samp_rate - int - sample rate of end IQ data
-baud_rate - int - baud rate of input data (samples per symbol)
-window_len = int - gaussian function window length in samples
-outputs:
-exit_code - int - function return code: 0 for success, 1+ for errors
-iq_data - numpy array, complex64 - output modulation data
-"""
-def bpsk_mod_lsl(raw_data, samp_rate, baud_rate, center_freq, window_len):
-    # function wrapped in try-except
-    try:
-        sps = int(samp_rate/baud_rate) # samples per symbol
-        phi_array = np.zeros(len(raw_data)*8*sps,dtype = "float32") # bit-expanded array
-        pos = 0 # variable to store position in phi array
-        # loop through the bytearray raw data
-        for i in range(0, len(raw_data)):
-            # loop through each bit
-            for j in range(0,8):
-                # for each bit, shift left and AND with 128
-                # if value is 0, shifted bit was zero
-                # else, shifted bit was 1
-                bit = raw_data[i] << j & 128
-                if bit > 0:
-                    # if > 0: add samp_rate number of 1's to phi array
-                    # else: add samp_rate number of 0's to phi array
-                    for k in range(0,sps):
-                        phi_array[pos+k] = np.pi
-                    pos = pos + sps
-                else:
-                    for k in range(0,sps):
-                        phi_array[pos+k] = 0.0
-                    pos = pos + sps
-        # generate gaussian window
-        gauss_window = gauss_window_gen(window_len)
-        # apply gaussian window to signal
-        phi_array = np.convolve(phi_array,gauss_window, mode='same')
-        # normalize array (-1 to 1)
-        phi_array = phi_array/np.amax(phi_array)*np.pi
-        # get i values with cosine
-        cos_array = np.cos(phi_array)
-        # get j values with sine
-        sin_array = np.sin(phi_array)
-        # combine into a complex array
-        # save as complex64 (default is complex128)
-        complex_array = (cos_array + 1j*sin_array).astype("complex64")
-        # check if we need to RF mix off baseband
-        if (center_freq != 0):
-            exit, mix_sig = tone_gen(center_freq, len(complex_array), samp_rate)
-            if (exit == 0):
-                # success, mix
-                complex_array = complex_array * mix_sig
-            else:
-                # error with tone
-                # return 1 and an empty array
-                complex_array = np.zeros(0,dtype="complex64")
-                return 1, complex_array
-        # return exit code 0 and complex array
-        return 0, complex_array
-    except:
-        # error handle
-        # return 1 and an empty array
-        complex_array = np.zeros(0,dtype="complex64")
-        return 1, complex_array
-
 
 """
 basic qpsk modulation: non-coherent
@@ -659,7 +591,7 @@ if __name__ == '__main__':
     #exit, data = bpsk_mod_lsl(raw_data, samp_rate, baud_rate, center_freq, 31)
     #exit, data = tone_gen(50000, samp_rate, samp_rate)
     #exit, data = gfsk_mod_4(raw_data, samp_rate, baud_rate, freq_div, center_freq, window_len)
-    exit, data = ook_mod(raw_data, samp_rate, baud_rate, center_freq)
+    exit, data = chirp_gen(25000, -25000, 1000000, 200000)
 
     #filename = "/home/user/Downloads/flock_of_seagulls.wav"
     #filename = "/home/user/Downloads/pcm0808m.wav"

@@ -4,7 +4,7 @@ python3-based RF signal generation toolset for R&D
 
 ### Version Control Information
 
-Program version: 0.1.0
+Program version: 0.1.1
 
 ### Dependencies
 

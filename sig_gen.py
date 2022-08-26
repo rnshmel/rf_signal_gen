@@ -5,7 +5,7 @@ import mod_utils
 import audio_utils
 import sys
 
-program_version = "0.0.3"
+program_version = "0.1.1"
 
 def open_file(filename):
     try:
@@ -156,6 +156,19 @@ def qpsk_sel():
     exit, data = mod_utils.qpsk_mod(raw_data,samp_rate,baud_rate,freq)
     return exit, data
 
+def noise_sel():
+    print("\nuniform noise signal selected\n")
+    N = int(input("length of noise signal (samples): "))
+    thresh = float(input("nouse signal threshold (float)(ex. .001 or.01): "))
+    exit, data = mod_utils.noise_gen(N, thresh)
+    return exit, data
+
+def guard_sel():
+    print("\nblank/guard signal selected\n")
+    N = int(input("length of blank guard signal (samples): "))
+    exit, data = mod_utils.blank_gen(N)
+    return exit, data
+
 def fhss_sel():
     print("\nFHSS selected\n")
     print("PLACEHOLDER - function not written yet")
@@ -189,10 +202,12 @@ def main():
     print("8:   4-level Gaussian Frequency Shift Keyed (4GFSK)")
     print("9:   Binary Phase Shift Keyed (BPSK)")
     print("10:  Quadrature Phase Shift Keyed (QPSK)")
+    print("11:  Noise Signal (uniform distribution)")
+    print("12:  Guard Band (no signal)")
     print("\n===== advanced waveforms =====")
-    print("11:  Frequency Hopping Spread Spectrum (FHSS)")
-    print("12:  Direct Sequence Spread Spectrum (DSSS)")
-    print("13:  Orthogonal Frequency Division Multiplexing (OFDM)")
+    print("13:  Frequency Hopping Spread Spectrum (FHSS)")
+    print("14:  Direct Sequence Spread Spectrum (DSSS)")
+    print("15:  Orthogonal Frequency Division Multiplexing (OFDM)")
 
     user_choice = int(input("\nselect a signal to generate: "))
 
@@ -219,10 +234,14 @@ def main():
     elif user_choice == 10:
         exit, data = qpsk_sel()
     elif user_choice == 11:
-        exit, data = fhss_sel()
+        exit, data = noise_sel()
     elif user_choice == 12:
-        exit, data = dsss_sel()
+        exit, data = guard_sel()
     elif user_choice == 13:
+        exit, data = fhss_sel()
+    elif user_choice == 14:
+        exit, data = dsss_sel()
+    elif user_choice == 15:
         exit, data = ofdm_sel()
     else:
         print("\ninvalid choice - exiting")

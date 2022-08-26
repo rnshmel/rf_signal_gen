@@ -115,6 +115,7 @@ def wav_file_load(filename):
             sample = (wav_data_raw[i+1] << 8) | wav_data_raw[i]
             wav_data_2[count] = sample
             count = count + 1
+            
         wav_data_float = wav_data_2.astype("float32")/np.max(abs(wav_data_2))
     return wav_data_float
 

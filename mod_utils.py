@@ -554,6 +554,51 @@ def ook_mod(raw_data, samp_rate, baud_rate, center_freq):
         return 1, complex_array
 
 """
+uniform noise distribution
+inputs:
+N - int - length of noise array in samples
+thresh - float - upper bound of noise max
+outputs:
+exit_code - int - function return code: 0 for success, 1+ for errors
+iq_data - numpy array, complex64 - output modulation data
+"""
+def noise_gen(N, thresh):
+    # error handle by wrapping in try-except
+    try:
+        float_array_0 = np.random.default_rng().uniform(-thresh,thresh,N)
+        float_array_1 = np.random.default_rng().uniform(-thresh,thresh,N)
+        complex_array = (float_array_0 + 1j*float_array_1).astype("complex64")
+        return 0, complex_array
+    except:
+        # error handle
+        # return 1 and an empty array
+        complex_array = np.zeros(0,dtype="complex64")
+        return 1, complex_array
+
+"""
+blank array used for guard bands
+inputs:
+N - int - length of array in samples
+outputs:
+exit_code - int - function return code: 0 for success, 1+ for errors
+iq_data - numpy array, complex64 - output modulation data
+"""
+def blank_gen(N):
+    # error handle by wrapping in try-except
+    try:
+        complex_array = np.zeros(N, dtype="complex64")
+        return 0, complex_array
+    except:
+        # error handle
+        # return 1 and an empty array
+        complex_array = np.zeros(0,dtype="complex64")
+        return 1, complex_array
+
+
+
+
+
+"""
 main function for testing purpose
 """
 def main():
@@ -590,8 +635,9 @@ if __name__ == '__main__':
     #exit, data = bpsk_mod(raw_data, samp_rate, baud_rate, center_freq)
     #exit, data = bpsk_mod_lsl(raw_data, samp_rate, baud_rate, center_freq, 31)
     #exit, data = tone_gen(50000, samp_rate, samp_rate)
-    #exit, data = gfsk_mod_4(raw_data, samp_rate, baud_rate, freq_div, center_freq, window_len)
-    exit, data = chirp_gen(25000, -25000, 1000000, 200000)
+    #exit, data = gfsk_mod_4(raw_data,
+    # samp_rate, baud_rate, freq_div, center_freq, window_len)
+    exit, data = blank_gen(2000000)
 
     #filename = "/home/user/Downloads/flock_of_seagulls.wav"
     #filename = "/home/user/Downloads/pcm0808m.wav"
@@ -607,11 +653,11 @@ if __name__ == '__main__':
     if exit == 0:
         print("success, writing to file - len: "+str(len(data)))
         data.tofile("test.iq")
-        temp = data[1:] * np.conj(data[:-1])
+        #temp = data[1:] * np.conj(data[:-1])
         #demod = np.abs(np.angle(temp))
-        demod = np.angle(temp)
-        plt.plot(demod)
-        plt.show()
+        #demod = np.angle(temp)
+        #plt.plot(demod)
+        #plt.show()
     else:
         print("error in test function, not writing to file")
     

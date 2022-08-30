@@ -594,10 +594,6 @@ def blank_gen(N):
         complex_array = np.zeros(0,dtype="complex64")
         return 1, complex_array
 
-
-
-
-
 """
 main function for testing purpose
 """
@@ -614,9 +610,9 @@ if __name__ == '__main__':
     for i in range(0,len(raw_data)):
         raw_data[i] = i
     """
-    samp_rate = 250000
+    samp_rate = 2000000
     baud_rate = 300
-    freq_div = 100000
+    freq_div = 50000
     center_freq = 0
     sps = int(samp_rate/baud_rate)
 
@@ -635,9 +631,8 @@ if __name__ == '__main__':
     #exit, data = bpsk_mod(raw_data, samp_rate, baud_rate, center_freq)
     #exit, data = bpsk_mod_lsl(raw_data, samp_rate, baud_rate, center_freq, 31)
     #exit, data = tone_gen(50000, samp_rate, samp_rate)
-    #exit, data = gfsk_mod_4(raw_data,
-    # samp_rate, baud_rate, freq_div, center_freq, window_len)
-    exit, data = blank_gen(2000000)
+    exit, data0 = gfsk_mod_2(raw_data, samp_rate, baud_rate, freq_div, center_freq, window_len)
+    exit, data1 = noise_gen(len(data0), .001)
 
     #filename = "/home/user/Downloads/flock_of_seagulls.wav"
     #filename = "/home/user/Downloads/pcm0808m.wav"
@@ -651,7 +646,8 @@ if __name__ == '__main__':
     """
 
     if exit == 0:
-        print("success, writing to file - len: "+str(len(data)))
+        print("success, writing to file - len: "+str(len(data0)))
+        data = data0+data1
         data.tofile("test.iq")
         #temp = data[1:] * np.conj(data[:-1])
         #demod = np.abs(np.angle(temp))

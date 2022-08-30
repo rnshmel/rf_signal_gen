@@ -1,3 +1,7 @@
+# version 0.1.2
+- patch am_analog_mod to return proper iq stream
+- added support for stereo wav files
+
 # version 0.1.1
 - added FM audio from WAV
 - added AM audio from WAV

@@ -1,6 +1,5 @@
 # signal generator interface
 # made to allow easiers use of sig gen libs
-from tkinter import N
 import mod_utils
 import audio_utils
 import sys

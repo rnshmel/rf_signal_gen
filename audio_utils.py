@@ -4,7 +4,7 @@ import wave
 from scipy import signal
 import math
 import mod_utils as mu
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 # globals
 ch_num = 0
